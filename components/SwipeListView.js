@@ -95,11 +95,19 @@ class SwipeListView extends PureComponent {
         this.props.onRowOpen && this.props.onRowOpen(key, this._rows, toValue);
     }
 
-    onRowPress() {
+    onRowPressClose() {
         if (this.openCellKey) {
             if (this.props.closeOnRowPress) {
                 this.safeCloseOpenRow();
                 this.openCellKey = null;
+            }
+        }
+    }
+
+    onRowPressOpen(key) {
+        if (!this.openCellKey) {
+            if (this.props.openOnRowPress) {
+                this.onRowOpen(key, toValue);
             }
         }
     }
@@ -187,7 +195,8 @@ class SwipeListView extends PureComponent {
                 onRowDidClose: () =>
                     this.props.onRowDidClose &&
                     this.props.onRowDidClose(key, this._rows),
-                onRowPress: () => this.onRowPress(),
+                onRowPressClose: () => this.onRowPressClose(),
+                onRowPressOpen: toValue => this.onRowPressOpen(key, toValue),
                 setScrollEnabled: enable => this.setScrollEnabled(enable),
                 swipeGestureBegan: () => this.rowSwipeGestureBegan(key),
                 swipeGestureEnded: (_, data) =>
@@ -199,10 +208,10 @@ class SwipeListView extends PureComponent {
                     onSwipeValueChange={
                         this.props.onSwipeValueChange
                             ? data =>
-                                  this.props.onSwipeValueChange({
-                                      ...data,
-                                      key,
-                                  })
+                                this.props.onSwipeValueChange({
+                                    ...data,
+                                    key,
+                                })
                             : null
                     }
                     ref={row => (this._rows[key] = row)}
@@ -223,7 +232,8 @@ class SwipeListView extends PureComponent {
                         this.props.onRowDidClose &&
                         this.props.onRowDidClose(key, this._rows)
                     }
-                    onRowPress={() => this.onRowPress(key)}
+                    onRowPressClose={() => this.onRowPressClose(key)}
+                    onRowPressOpen={toValue => this.onRowPressOpen(key, toValue)}
                     leftActivationValue={
                         item.leftActivationValue ||
                         this.props.leftActivationValue
@@ -261,28 +271,28 @@ class SwipeListView extends PureComponent {
                     onLeftActionStatusChange={
                         this.props.onLeftActionStatusChange
                             ? data =>
-                                  this.props.onLeftActionStatusChange({
-                                      ...data,
-                                      key,
-                                  })
+                                this.props.onLeftActionStatusChange({
+                                    ...data,
+                                    key,
+                                })
                             : null
                     }
                     onRightActionStatusChange={
                         this.props.onRightActionStatusChange
                             ? data =>
-                                  this.props.onRightActionStatusChange({
-                                      ...data,
-                                      key,
-                                  })
+                                this.props.onRightActionStatusChange({
+                                    ...data,
+                                    key,
+                                })
                             : null
                     }
                     shouldItemUpdate={
                         this.props.shouldItemUpdate
                             ? (currentItem, newItem) =>
-                                  this.props.shouldItemUpdate(
-                                      currentItem,
-                                      newItem
-                                  )
+                                this.props.shouldItemUpdate(
+                                    currentItem,
+                                    newItem
+                                )
                             : null
                     }
                     setScrollEnabled={enable => this.setScrollEnabled(enable)}
@@ -294,6 +304,9 @@ class SwipeListView extends PureComponent {
                     }
                     closeOnRowPress={
                         item.closeOnRowPress || this.props.closeOnRowPress
+                    }
+                    openOnRowPress={
+                        item.openOnRowPress || this.props.openOnRowPress
                     }
                     disableLeftSwipe={
                         item.disableLeftSwipe || this.props.disableLeftSwipe
@@ -508,6 +521,10 @@ SwipeListView.propTypes = {
     /**
      * Should open rows be closed when a row begins to swipe open
      */
+    openOnRowPress: PropTypes.bool,
+    /**
+     * Should open rows be closed when a row begins to swipe open
+     */
     closeOnRowBeginSwipe: PropTypes.bool,
     /**
      * Should open rows be closed when another row is opened
@@ -699,6 +716,7 @@ SwipeListView.defaultProps = {
     closeOnRowBeginSwipe: false,
     closeOnScroll: true,
     closeOnRowPress: true,
+    openOnRowPress: false,
     closeOnRowOpen: true,
     disableLeftSwipe: false,
     disableRightSwipe: false,
